@@ -41,8 +41,18 @@ using namespace std;
 */
 vector< vector <float> > initialize_beliefs(vector< vector <char> > grid) {
 	vector< vector <float> > newGrid;
+    int height = grid.size();
+    int width = grid[0].size();
+    int area = height * width;
+    float belief_per_cell = 1.0 / area;
 
-	// your code here
+    for (int i = 0; i <  height; i++) {
+        vector<float> row;
+        for (int j = 0; j < width; j++) {
+            row.push_back(belief_per_cell);
+        }
+        newGrid.push_back(row);
+    }
 	
 	return newGrid;
 }
@@ -86,16 +96,23 @@ vector< vector <float> > initialize_beliefs(vector< vector <char> > grid) {
 */
 vector< vector <float> > move(int dy, int dx, 
   vector < vector <float> > beliefs,
-  float blurring) 
-{
+  float blurring) {
 
-  vector < vector <float> > newGrid;
 
-  // your code here
+    int height = beliefs.size();
+    int width = beliefs[0].size();
 
-  return blur(newGrid, blurring);
+    vector < vector<float> > newGrid = zeros(height, width);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int new_i = (i + dy + height) % height;
+            int new_j = (j + dx + width) % width;
+            newGrid[new_i][new_j] = beliefs[i][j];
+        }
+    }
+    return blur(newGrid, blurring);
 }
-
 
 /**
 	TODO - implement this function 
@@ -138,11 +155,21 @@ vector< vector <float> > sense(char color,
 	vector< vector <char> > grid, 
 	vector< vector <float> > beliefs, 
 	float p_hit,
-	float p_miss) 
-{
-	vector< vector <float> > newGrid;
+	float p_miss) {
 
-	// your code here
+    int rows = beliefs.size();
+    int cols = beliefs[0].size();
+    vector< vector <float> > newGrid = zeros(rows,cols);
 
-	return normalize(newGrid);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (grid[i][j] == color) {
+                newGrid[i][j] = beliefs[i][j] * p_hit;
+            } else {
+                newGrid[i][j] = beliefs[i][j] * p_miss;
+            }
+        }
+    }
+    return normalize(newGrid);
 }
+
